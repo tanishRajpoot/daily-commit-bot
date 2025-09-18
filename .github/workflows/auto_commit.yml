@@ -2,24 +2,29 @@ name: Daily Commit
 
 on:
   schedule:
-    - cron: "0 9 * * *"   # Runs every day at 9 AM UTC (adjust time if needed)
+    - cron: "0 9 * * *"   # Every day at 9 AM UTC
   workflow_dispatch:       # Allow manual trigger
 
 jobs:
-  build:
+  auto-commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # ✅ allows pushing back to repo
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          persist-credentials: true   # ✅ keeps the GITHUB_TOKEN
 
       - name: Set up Git
         run: |
-          git config --global user.name "tanishRajpoot"
-          git config --global user.email "rajpoottanish04@gmail.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Make a change
         run: |
           echo "Updated on $(date)" >> daily_update.txt
           git add daily_update.txt
-          git commit -m "Daily update $(date)"
+          git commit -m "Daily update $(date)" || echo "No changes to commit"
           git push
